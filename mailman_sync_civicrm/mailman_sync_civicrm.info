@@ -1,0 +1,6 @@
+name = Mailman Synchronization CiviCRM Groups
+description = Expose CiviCRM groups to Mailman Synchronization module.
+core = 7.x
+package = Mailman
+dependencies[] = civicrm
+dependencies[] = mailman_sync

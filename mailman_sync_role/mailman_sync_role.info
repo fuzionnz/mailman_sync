@@ -1,0 +1,5 @@
+name = Mailman Synchronization Role-based Groups
+description = Create groups based on Drupal role for Mailman Synchronisation module.
+core = 7.x
+dependencies[] = mailman_sync
+package = Mailman

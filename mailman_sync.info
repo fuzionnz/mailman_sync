@@ -1,0 +1,4 @@
+name = Mailman Synchronisation
+description = Synchronise users in arbitrary Drupal groups with Mailman lists.
+core = 7.x
+package = Mailman

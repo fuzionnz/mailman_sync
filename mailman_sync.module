@@ -1,0 +1,128 @@
+<?php
+
+function mailman_sync_menu() {
+  return array(
+    'admin/config/mailman' => array(
+      'title'           => 'Mailman Synchronization',
+      'page callback'   => 'drupal_get_form',
+      'page arguments'  => array('_mailman_sync_configuration_form'),
+      'access callback' => TRUE,
+      'file'            => 'mailman_sync.admin.inc',
+    ),
+    'admin/config/mailman/%mailman_sync_group/edit' => array(
+      'title'           => 'Edit Group',
+      'page callback'   => 'drupal_get_form',
+      'page arguments'  => array('_mailman_sync_edit_form', 3),
+      'access callback' => TRUE,
+      'file'            => 'mailman_sync.admin.inc',
+    ),
+    'mailman/sync/map' => array(
+      'page callback'   => '_mailman_sync_list_map',
+      'access callback' => '_mailman_sync_verify_access',
+    ),
+    'mailman/sync/%mailman_sync_group' => array(
+      'page callback'   => '_mailman_sync_list_users',
+      'page arguments'  => array(2),
+      'access callback' => '_mailman_sync_verify_access',
+      'access arguments' => array(2),
+    ),
+  );
+}
+
+function mailman_sync_hook_info() {
+  return array(
+    'mailman_sync_group_info' => array(
+      'group' => 'mailman_sync',
+    ),
+  );
+}
+
+function mailman_sync_group_info_load() {
+  // Load groups info; try cache first.
+  if (!$groups = cache_get('mailman_sync_groups')->data) {
+    $groups = module_invoke_all('mailman_sync_group_info');
+    cache_set('mailman_sync_groups', $groups, 'cache', CACHE_TEMPORARY);
+
+    // Create new entries in configuration table for missing items.
+    $current_groups = db_query("SELECT group_id FROM mailman_sync")->fetchCol();
+    $new_groups = array_diff(array_keys($groups), $current_groups);
+    foreach ($new_groups as $new_group) {
+      $record = array('group_id' => $new_group);
+      drupal_write_record('mailman_sync', $record);
+    }
+  }
+  else {
+    // We still need the inlcude files loaded for any other functions that
+    // may be defined within.
+    module_load_all_includes('mailman_sync.inc');
+  }
+
+
+  // Append configuration info to each group.
+  $groups_conf = db_query("SELECT group_id, mailman_list, status FROM mailman_sync")->fetchAllAssoc('group_id');
+  foreach ($groups as $group_id => $group) {
+    $groups[$group_id]['status'] = $groups_conf[$group_id]->status;
+    $groups[$group_id]['mailman_list'] = $groups_conf[$group_id]->mailman_list;
+  }
+
+  return $groups;
+}
+
+function mailman_sync_group_load($group_id) {
+  $groups = mailman_sync_group_info_load();
+
+  if (!empty($group_id) && !empty($groups[$group_id])) {
+    $group = $groups[$group_id];
+    $group['group_id'] = $group_id;
+    $group['members'] = call_user_func_array($group['members callback'], $group['members arguments']);
+    return $group;
+  }
+  else return FALSE;
+}
+
+function _mailman_sync_verify_access($group = NULL) {
+  // First check key
+  $submitted_key = $_GET['mailman_key'];
+  $mailman_key = variable_get('mailman_sync_key');
+  if (($group == NULL || $group['status']) && !empty($mailman_key) && $mailman_key == $submitted_key) {
+    return TRUE;
+  }
+  else return FALSE;
+}
+
+function _mailman_sync_list_users($group) {
+  drupal_add_http_header('Content-Type', 'text/plain');
+  $text = '';
+  foreach ($group['members'] as $member) {
+    if (!empty($member['name'])) {
+      $name = str_replace('"', '', $member['name']);
+      $text .= "\"{$name}\" <{$member['email']}>\n";
+    }
+    else {
+      $text .= "{$member['email']}\n";
+    }
+  }
+
+  print $text;
+  drupal_exit();
+}
+
+function _mailman_sync_list_map() {
+  drupal_add_http_header('Content-Type', 'text/plain');
+
+  $result = db_query("SELECT group_id, mailman_list FROM mailman_sync WHERE status = 1 AND mailman_list <> ''");
+  $text = '';
+  foreach ($result as $row) {
+    $link = url("mailman/sync/{$row->group_id}", array(
+      'absolute' => TRUE,
+    ));
+    $text .= "{$row->mailman_list} {$link}\n";
+  }
+
+  print $text;
+  drupal_exit();
+}
+
+function _mailman_sync_generate_key() {
+  return md5(mt_rand());
+}

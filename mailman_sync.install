@@ -1,0 +1,35 @@
+<?php
+
+function mailman_sync_install() {
+  variable_set('mailman_sync_key', _mailman_sync_generate_key());
+}
+
+function mailman_sync_schema() {
+  $schema['mailman_sync'] = array(
+    'description' => 'Configuration table for Mailman Synchronization module.',
+    'fields' => array(
+      'group_id' => array(
+        'description' => 'The primary identifier for a group.',
+        'type' => 'varchar',
+        'length' => 255,
+        'not null' => TRUE,
+      ),
+      'mailman_list' => array(
+        'description' => 'The matching mailman list name.',
+        'type' => 'varchar',
+        'length' => 255,
+        'not null' => TRUE,
+        'default' => '',
+      ),
+      'status' => array(
+        'description' => 'Whether group synchronization is enabled.',
+        'type' => 'int',
+        'size' => 'tiny',
+        'not null' => TRUE,
+        'default' => 0,
+      ),
+    ),
+    'primary key' => array('group_id'),
+  );
+  return $schema;
+}
