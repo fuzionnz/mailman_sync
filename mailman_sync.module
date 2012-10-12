@@ -3,18 +3,18 @@
 function mailman_sync_menu() {
   return array(
     'admin/config/mailman' => array(
-      'title'           => 'Mailman Synchronization',
-      'page callback'   => 'drupal_get_form',
-      'page arguments'  => array('_mailman_sync_configuration_form'),
-      'access callback' => TRUE,
-      'file'            => 'mailman_sync.admin.inc',
+      'title'            => 'Mailman Synchronization',
+      'page callback'    => 'drupal_get_form',
+      'page arguments'   => array('_mailman_sync_configuration_form'),
+      'access arguments' => array('administer users'),
+      'file'             => 'mailman_sync.admin.inc',
     ),
     'admin/config/mailman/%mailman_sync_group/edit' => array(
-      'title'           => 'Edit Group',
-      'page callback'   => 'drupal_get_form',
-      'page arguments'  => array('_mailman_sync_edit_form', 3),
-      'access callback' => TRUE,
-      'file'            => 'mailman_sync.admin.inc',
+      'title'            => 'Edit Group',
+      'page callback'    => 'drupal_get_form',
+      'page arguments'   => array('_mailman_sync_edit_form', 3),
+      'access arguments' => array('administer users'),
+      'file'             => 'mailman_sync.admin.inc',
     ),
     'mailman/sync/map' => array(
       'page callback'   => '_mailman_sync_list_map',
