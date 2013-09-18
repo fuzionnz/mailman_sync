@@ -59,10 +59,11 @@ function mailman_sync_group_info_load() {
 
 
   // Append configuration info to each group.
-  $groups_conf = db_query("SELECT group_id, mailman_list, status FROM mailman_sync")->fetchAllAssoc('group_id');
+  $groups_conf = db_query("SELECT group_id, mailman_list, mailman_password, status FROM mailman_sync")->fetchAllAssoc('group_id');
   foreach ($groups as $group_id => $group) {
     $groups[$group_id]['status'] = $groups_conf[$group_id]->status;
     $groups[$group_id]['mailman_list'] = $groups_conf[$group_id]->mailman_list;
+    $groups[$group_id]['mailman_password'] = $groups_conf[$group_id]->mailman_password;
   }
 
   return $groups;
@@ -110,13 +111,13 @@ function _mailman_sync_list_users($group) {
 function _mailman_sync_list_map() {
   drupal_add_http_header('Content-Type', 'text/plain');
 
-  $result = db_query("SELECT group_id, mailman_list FROM mailman_sync WHERE status = 1 AND mailman_list <> ''");
+  $result = db_query("SELECT group_id, mailman_list, mailman_password FROM mailman_sync WHERE status = 1 AND mailman_list <> ''");
   $text = '';
   foreach ($result as $row) {
     $link = url("mailman/sync/{$row->group_id}", array(
       'absolute' => TRUE,
     ));
-    $text .= "{$row->mailman_list} {$link}\n";
+    $text .= "{$row->mailman_list} {$row->mailman_password} {$link}\n";
   }
 
   print $text;

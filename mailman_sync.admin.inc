@@ -117,6 +117,14 @@ function _mailman_sync_edit_form($form, &$form_state, $group) {
     '#title' => 'Mailman list name',
     '#description' => t('Enter the name of the matching mailman list for this group.'),
     '#default_value' => $group['mailman_list'],
+    '#required' => TRUE,
+  );
+  $form['mailman_password'] = array(
+    '#type' => 'textfield',
+    '#title' => 'List password',
+    '#description' => 'The list password. Mailman user passwords, moderator passwords and admin passwords will not validate.',
+    '#default_value' => $group['mailman_password'],
+    '#required' => TRUE,
   );
   $form['submit'] = array(
     '#type' => 'submit',
@@ -135,7 +143,11 @@ function _mailman_sync_edit_form_validate($form, &$form_state) {
 
 function _mailman_sync_edit_form_submit($form, &$form_state) {
   $group = mailman_sync_group_load($form_state['values']['group_id']);
-  $record = array('group_id' => $group['group_id'], 'mailman_list' => $form_state['values']['mailman_list']);
+  $record = array(
+    'group_id' => $group['group_id'],
+    'mailman_list' => $form_state['values']['mailman_list'],
+    'mailman_password' => $form_state['values']['mailman_password'],
+  );
   drupal_write_record('mailman_sync', $record, 'group_id');
   drupal_goto('admin/config/mailman');
 }

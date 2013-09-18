@@ -21,6 +21,13 @@ function mailman_sync_schema() {
         'not null' => TRUE,
         'default' => '',
       ),
+      'mailman_password' => array(
+        'description' => 'The mailman list password.',
+        'type' => 'varchar',
+        'length' => 255,
+        'not null' => TRUE,
+        'default' => '',
+      ),
       'status' => array(
         'description' => 'Whether group synchronization is enabled.',
         'type' => 'int',
@@ -32,4 +39,17 @@ function mailman_sync_schema() {
     'primary key' => array('group_id'),
   );
   return $schema;
+}
+
+/**
+ * Add mailman password column to mailman_sync table.
+ */
+function mailman_sync_update_7001() {
+  db_add_field('mailman_sync', 'mailman_password', array(
+    'description' => 'The mailman list password.',
+    'type' => 'varchar',
+    'length' => 255,
+    'not null' => TRUE,
+    'default' => '',
+  ));
 }
