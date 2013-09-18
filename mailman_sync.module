@@ -83,12 +83,12 @@ function mailman_sync_group_load($group_id) {
 
 function _mailman_sync_verify_access($group = NULL) {
   // First check key
-  $submitted_key = $_GET['mailman_key'];
-  $mailman_key = variable_get('mailman_sync_key');
-  if (($group == NULL || $group['status']) && !empty($mailman_key) && $mailman_key == $submitted_key) {
-    return TRUE;
+  if ($submitted_key = $_GET['mailman_key']) {
+    $mailman_key = variable_get('mailman_sync_key');
+    if (($group == NULL || $group['status']) && !empty($mailman_key) && $mailman_key == $submitted_key) {
+      return TRUE;
+    }
   }
-  else return FALSE;
 }
 
 function _mailman_sync_list_users($group) {
