@@ -9,6 +9,11 @@ function mailman_sync_menu() {
       'access arguments' => array('administer users'),
       'file'             => 'mailman_sync.admin.inc',
     ),
+    'admin/config/mailman/list' => array(
+      'title' => T('List'),
+      'type' =>  MENU_DEFAULT_LOCAL_TASK,
+      'weight' => -10,
+    ),
     'admin/config/mailman/%mailman_sync_group/edit' => array(
       'title'            => 'Edit Group',
       'page callback'    => 'drupal_get_form',
@@ -20,7 +25,7 @@ function mailman_sync_menu() {
       'page callback'   => '_mailman_sync_list_map',
       'access callback' => '_mailman_sync_verify_access',
     ),
-    'mailman/sync/%mailman_sync_group' => array(
+    'mailman/sync/%' => array(
       'page callback'   => '_mailman_sync_list_users',
       'page arguments'  => array(2),
       'access callback' => '_mailman_sync_verify_access',
@@ -81,20 +86,30 @@ function mailman_sync_group_load($group_id) {
   else return FALSE;
 }
 
-function _mailman_sync_verify_access($group = NULL) {
+function _mailman_sync_verify_access($list = NULL) {
   // First check key
   if (isset($_GET['mailman_key']) && $submitted_key = $_GET['mailman_key']) {
     $mailman_key = variable_get('mailman_sync_key');
-    if (($group == NULL || $group['status']) && !empty($mailman_key) && $mailman_key == $submitted_key) {
+    if (!empty($mailman_key) && $mailman_key == $submitted_key) {
       return TRUE;
     }
   }
 }
 
-function _mailman_sync_list_users($group) {
+function _mailman_sync_list_users($list) {
+  $results = db_query("SELECT group_id FROM {mailman_sync} WHERE mailman_list = :list AND status = 1", array(':list' => $list))
+    ->fetchAll();
+
+  // Merge members from each group
+  $members = array();
+  foreach ($results as $result) {
+    $group = mailman_sync_group_load($result->group_id);
+    $members = $members + $group['members'];
+  }
+
   drupal_add_http_header('Content-Type', 'text/plain');
   $text = '';
-  foreach ($group['members'] as $member) {
+  foreach ($members as $member) {
     if (!empty($member['name'])) {
       $name = str_replace('"', '', $member['name']);
       $text .= "\"{$name}\" <{$member['email']}>\n";
@@ -111,13 +126,13 @@ function _mailman_sync_list_users($group) {
 function _mailman_sync_list_map() {
   drupal_add_http_header('Content-Type', 'text/plain');
 
-  $result = db_query("SELECT group_id, mailman_list, mailman_password FROM mailman_sync WHERE status = 1 AND mailman_list <> ''");
+  $result = db_query("SELECT DISTINCT(mailman_list) mailman_list FROM mailman_sync WHERE status = 1 AND mailman_list <> ''");
   $text = '';
   foreach ($result as $row) {
-    $link = url("mailman/sync/{$row->group_id}", array(
+    $link = url("mailman/sync/{$row->mailman_list}", array(
       'absolute' => TRUE,
     ));
-    $text .= "{$row->mailman_list} {$row->mailman_password} {$link}\n";
+    $text .= "{$row->mailman_list} {$link}\n";
   }
 
   print $text;

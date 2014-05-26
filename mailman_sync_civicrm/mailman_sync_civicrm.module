@@ -1,1 +1,70 @@
 <?php
+
+/**
+ * Implements hook_menu().
+ */
+function mailman_sync_civicrm_menu() {
+  return array(
+    'admin/config/mailman/civicrm-relationships' => array(
+      'title'            => 'Civicrm Relationship Builder',
+      'page callback'    => 'drupal_get_form',
+      'page arguments'   => array('mailman_sync_civicrm_relationship_form'),
+      'access arguments' => array('administer users'),
+      'file'             => 'mailman_sync_civicrm.admin.inc',
+      'type'             => MENU_LOCAL_TASK,
+    ),
+    'admin/config/mailman/civicrm-relationships/delete/%' => array(
+      'page callback'    => '_mailman_sync_civicrm_relationship_delete',
+      'page arguments'   => array(5),
+      'access arguments' => array('administer users'),
+      'file'             => 'mailman_sync_civicrm.admin.inc',
+      'type'             => MENU_CALLBACK,
+    ),
+    'admin/config/mailman/cvicicrm-relationships/autocomplete' => array(
+      'page callback'    => '_mailman_sync_civicrm_autocomplete',
+      'access arguments' => array('administer users'),
+      'file'             => 'mailman_sync_civicrm.admin.inc',
+      'type'             => MENU_CALLBACK,
+    ),
+  );
+}
+
+function _mailman_sync_civicrm_get_relationship_types() {
+  if (!civicrm_initialize()) {
+    return array();
+  }
+
+  $relationship_types = civicrm_api('relationship_type', 'get', array(
+    'version' => 3,
+    'is_active' => 1,
+    'options' => array(
+      'limit' => 500,
+    ),
+  ));
+  if (!empty($relationship_types['is_error'])) {
+    return array();
+  }
+
+  $options = array();
+  foreach ($relationship_types['values'] as $relationship_type) {
+    $options[$relationship_type['id']] = $relationship_type['label_a_b'] . " | " . $relationship_type['label_b_a'];
+  }
+  return $options;
+}
+
+function _mailman_sync_civicrm_get_contact($contact_id) {
+  if (!civicrm_initialize()) {
+    return FALSE;
+  }
+
+  $result = civicrm_api('contact', 'getsingle', array(
+    'version' => 3,
+    'id' => $contact_id,
+  ));
+
+  if (!empty($result['is_error'])) {
+    return FALSE;
+  }
+
+  return $result;
+}

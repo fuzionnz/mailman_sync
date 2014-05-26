@@ -28,7 +28,7 @@ function _mailman_sync_role_drupal_role($rid) {
   $result = db_query($query, array(':rid' => $rid));
   $members = array();
   foreach ($result as $row) {
-    $members[] = array(
+    $members[$row->email] = array(
       'name' => $row->name,
       'email' => $row->email,
     );

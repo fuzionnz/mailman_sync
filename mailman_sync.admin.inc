@@ -13,7 +13,7 @@ function _mailman_sync_configuration_form($form_state) {
     'name'     => t('Name'),
     'group_id' => t('Group ID'),
     'mailman_list' => t('Mailman List'),
-    'members_list' => t('Members list'),
+    //'members_list' => t('Members list'),
     'edit'         => t('Edit'),
   );
   $options = array();
@@ -35,7 +35,7 @@ function _mailman_sync_configuration_form($form_state) {
       'group_id' => $group_id,
       'name'     => $group['title'],
       'mailman_list' => $group['mailman_list'],
-      'members_list' => $members_list,
+      //'members_list' => $members_list,
       'edit' => l('Edit', "admin/config/mailman/{$group_id}/edit"),
     );
   }
@@ -134,11 +134,6 @@ function _mailman_sync_edit_form($form, &$form_state, $group) {
 }
 
 function _mailman_sync_edit_form_validate($form, &$form_state) {
-  $group_id = $form_state['values']['group_id'];
-  $mailman_list = $form_state['values']['mailman_list'];
-  if (db_query("SELECT COUNT(*) FROM mailman_sync WHERE group_id <> :group_id AND mailman_list = :mailman_list", array(':group_id' => $group_id, ':mailman_list' => $mailman_list))->fetchField()) {
-    form_set_error('mailman_list', "This mailman list is already configured for another group.");
-  }
 }
 
 function _mailman_sync_edit_form_submit($form, &$form_state) {
