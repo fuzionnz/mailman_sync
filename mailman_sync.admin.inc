@@ -13,7 +13,6 @@ function _mailman_sync_configuration_form($form_state) {
     'name'     => t('Name'),
     'group_id' => t('Group ID'),
     'mailman_list' => t('Mailman List'),
-    'members_list' => t('Members list'),
     'edit'         => t('Edit'),
   );
   $options = array();
@@ -35,8 +34,8 @@ function _mailman_sync_configuration_form($form_state) {
       'group_id' => $group_id,
       'name'     => $group['title'],
       'mailman_list' => $group['mailman_list'],
-      'members_list' => $members_list,
       'edit' => l('Edit', "admin/config/mailman/{$group_id}/edit"),
+      '#disabled' => TRUE,
     );
   }
 
@@ -50,7 +49,7 @@ function _mailman_sync_configuration_form($form_state) {
   $form['mailman_mapping_link']['link'] = array(
     '#prefix' => '<p>',
     '#suffix' => '</p>',
-    '#markup' => l(url('mailman/sync/map', array('absolute' => TRUE)), 'mailman/sync/map', array('absolute' => TRUE)),
+    '#markup' => t("<strong>Mapping link:</strong> !mapping_link", array('!mapping_link' => url('mailman/sync/map', array('absolute' => TRUE)))),
   );
   $form['mailman_sync_key'] = array(
     '#type' => 'fieldset',
@@ -76,6 +75,7 @@ function _mailman_sync_configuration_form($form_state) {
     '#type' => 'tableselect',
     '#header' => $header,
     '#options' => $options,
+    '#js_select' => FALSE,
     '#empty' => t('No groups are enabled. Please enable mailman_sync group modules.'),
     '#default_value' => $status,
   );
@@ -119,13 +119,6 @@ function _mailman_sync_edit_form($form, &$form_state, $group) {
     '#default_value' => $group['mailman_list'],
     '#required' => TRUE,
   );
-  $form['mailman_password'] = array(
-    '#type' => 'textfield',
-    '#title' => 'List password',
-    '#description' => 'The list password. Mailman user passwords, moderator passwords and admin passwords will not validate.',
-    '#default_value' => $group['mailman_password'],
-    '#required' => TRUE,
-  );
   $form['submit'] = array(
     '#type' => 'submit',
     '#value' => t('Save Configuration'),
@@ -134,11 +127,6 @@ function _mailman_sync_edit_form($form, &$form_state, $group) {
 }
 
 function _mailman_sync_edit_form_validate($form, &$form_state) {
-  $group_id = $form_state['values']['group_id'];
-  $mailman_list = $form_state['values']['mailman_list'];
-  if (db_query("SELECT COUNT(*) FROM mailman_sync WHERE group_id <> :group_id AND mailman_list = :mailman_list", array(':group_id' => $group_id, ':mailman_list' => $mailman_list))->fetchField()) {
-    form_set_error('mailman_list', "This mailman list is already configured for another group.");
-  }
 }
 
 function _mailman_sync_edit_form_submit($form, &$form_state) {
