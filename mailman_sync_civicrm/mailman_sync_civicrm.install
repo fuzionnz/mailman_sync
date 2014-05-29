@@ -1,0 +1,28 @@
+<?php
+
+function mailman_sync_civicrm_schema() {
+  $schema['mailman_sync_civicrm'] = array(
+    'description' => 'Configuration table for Mailman Synchronization CiviCRM module.',
+    'fields' => array(
+      'id' => array(
+        'type' => 'serial',
+        'unsigned' => TRUE,
+        'not null' => TRUE,
+      ),
+      'relationship_type_id' => array(
+        'type' => 'int',
+        'unsigned' => TRUE,
+        'not null' => TRUE,
+      ),
+      'contact_b' => array(
+        'type' => 'int',
+        'unsigned' => TRUE,
+      ),
+    ),
+    'unique keys' => array(
+      'rel_contact' => array('relationship_type_id', 'contact_b'),
+    ),
+    'primary key' => array('id'),
+  );
+  return $schema;
+}
