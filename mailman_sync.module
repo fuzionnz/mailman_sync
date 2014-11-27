@@ -83,7 +83,7 @@ function mailman_sync_group_load($group_id) {
     $group['members'] = call_user_func_array($group['members callback'], $group['members arguments']);
     return $group;
   }
-  else return FALSE;
+  else return array();
 }
 
 function _mailman_sync_verify_access($list = NULL) {
@@ -104,7 +104,9 @@ function _mailman_sync_list_users($list) {
   $members = array();
   foreach ($results as $result) {
     $group = mailman_sync_group_load($result->group_id);
-    $members = $members + $group['members'];
+    if (!empty($group['members'])) {
+      $members = $members + $group['members'];
+    }
   }
 
   drupal_add_http_header('Content-Type', 'text/plain');
