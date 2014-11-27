@@ -114,6 +114,8 @@ function _mailman_sync_list_users($list) {
   foreach ($members as $member) {
     if (!empty($member['name'])) {
       $name = str_replace('"', '', $member['name']);
+      // Mailman doens't handle names with non-ascii characters
+      $name = filter_var($name, FILTER_SANITIZE_STRING, FILTER_FLAG_STRIP_HIGH);
       $text .= "\"{$name}\" <{$member['email']}>\n";
     }
     else {
