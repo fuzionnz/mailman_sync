@@ -112,6 +112,11 @@ function _mailman_sync_list_users($list) {
   drupal_add_http_header('Content-Type', 'text/plain');
   $text = '';
   foreach ($members as $member) {
+    // Remove invalid email addresses, as mailman will bork otherwise
+    if (!filter_var($member['email'], FILTER_VALIDATE_EMAIL)) {
+      continue;
+    }
+
     if (!empty($member['name'])) {
       $name = str_replace('"', '', $member['name']);
       // Mailman doens't handle names with non-ascii characters
