@@ -113,7 +113,7 @@ function _mailman_sync_list_users($list) {
   $text = '';
   foreach ($members as $member) {
     // Remove invalid email addresses, as mailman will bork otherwise
-    if (!filter_var($member['email'], FILTER_VALIDATE_EMAIL)) {
+    if (empty($member['email']) || !filter_var($member['email'], FILTER_VALIDATE_EMAIL)) {
       continue;
     }
 
