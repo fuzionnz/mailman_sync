@@ -9,7 +9,13 @@ function mailman_sync_civicrm_mailman_sync_group_info() {
   }
 
   // Grab array of all Civicrm groups.
-  $civicrm_groups = civicrm_api('Group', 'get', array('version' => 3, 'sequential' => 1));
+  $civicrm_groups = civicrm_api('Group', 'get', array(
+    'version' => 3,
+    'sequential' => 1,
+    'options' => array(
+      'limit' => 0, // No limit
+    ),
+  ));
   if ($civicrm_groups['is_error']) {
     return $groups; // Return empty groups array.
   }
