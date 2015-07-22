@@ -109,7 +109,7 @@ function _mailman_sync_list_users($list) {
     }
   }
 
-  drupal_add_http_header('Content-Type', 'text/plain');
+  drupal_add_http_header('Content-Type', 'text/plain; charset=utf-8');
   $text = '';
   foreach ($members as $member) {
     // Remove invalid email addresses, as mailman will bork otherwise
@@ -133,7 +133,7 @@ function _mailman_sync_list_users($list) {
 }
 
 function _mailman_sync_list_map() {
-  drupal_add_http_header('Content-Type', 'text/plain');
+  drupal_add_http_header('Content-Type', 'text/plain; charset=utf-8');
 
   $result = db_query("SELECT DISTINCT(mailman_list) mailman_list FROM mailman_sync WHERE status = 1 AND mailman_list <> ''");
   $text = '';
