@@ -21,6 +21,9 @@ function mailman_sync_civicrm_mailman_sync_group_info() {
   }
 
   foreach ($civicrm_groups['values'] as $civicrm_group) {
+    // Remove smart groups from the list.
+    if (!empty($civicrm_group['saved_search_id'])) { continue; }
+
     $groups["civicrm_group_{$civicrm_group['id']}"] = array(
       'title' => "Civicrm group: {$civicrm_group['name']}",
       'members callback' => '_mailman_sync_civicrm_group_members',
