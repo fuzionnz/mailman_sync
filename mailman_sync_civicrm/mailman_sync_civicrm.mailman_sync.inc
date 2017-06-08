@@ -44,11 +44,13 @@ function mailman_sync_civicrm_mailman_sync_group_info() {
       $contact_name = '*';
     }
 
-    $groups["civicrm_relationship_{$result->id}"] = array(
-      'title' => "Civicrm relationship: {$relationship_types[$result->relationship_type_id]} ({$contact_name})",
-      'members callback' => '_mailman_sync_civicrm_relationship_members',
-      'members arguments' => array($result->relationship_type_id, $result->contact_b),
-    );
+    if (isset($result->id)) {
+      $groups["civicrm_relationship_{$result->id}"] = array(
+        'title' => "Civicrm relationship: {$relationship_types[$result->relationship_type_id]} ({$contact_name})",
+        'members callback' => '_mailman_sync_civicrm_relationship_members',
+        'members arguments' => array($result->relationship_type_id, $result->contact_b),
+      );
+    }
   }
 
   return $groups;
